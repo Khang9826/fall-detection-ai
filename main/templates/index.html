@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Fall Detection Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/body.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="logo">FALL DETECTION AI</div>
+    <nav>
+        <a href="#live">Live Camera</a>
+        <a href="#stats">Statistics</a>
+        <a href="#logs">Event Logs</a>
+        <a href="#system">System</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>AI Fall Detection System</h1>
+    <p class="subtitle">
+        Real-time fall detection using YOLOv8 and MediaPipe Pose.<br>
+        Designed for healthcare and smart surveillance systems.
+    </p>
+    <!-- <a href="#live" class="cta-button">Start Monitoring</a> -->
+    <button onclick="startCamera()" class="cta-button">Start Camera</button>
+    <button onclick="stopCamera()" class="cta-button">Stop Camera</button>
+</section>
+
+<section class="stats" id="stats">
+    <div class="stat-card">
+        <!-- <div class="stat-number" id="model-status">ON</div> -->
+        <div class="stat-number" id="model-status">OFF</div>
+        <div class="stat-label">Model Status</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="fps">0</div>
+        <div class="stat-label">FPS</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="fall-count">0</div>
+        <div class="stat-label">Fall Events</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="accuracy">0%</div>
+        <div class="stat-label">Accuracy</div>
+    </div>
+</section>
+
+<section class="features">
+
+    <!-- LIVE CAMERA -->
+    <div class="feature-card" id="live">
+        <div class="feature-header">
+            <div class="feature-icon">📷</div>
+            <h2 class="feature-title">Live Camera</h2>
+        </div>
+            
+        <img id="video-stream"
+             src="http://localhost:5000/video_feed"
+             alt="Live Stream"
+             style="width: 100%; border-radius: 16px;" />
+    </div>
+
+
+    <!-- SYSTEM METRICS -->
+    <div class="feature-card" id="system">
+        <div class="feature-header">
+            <div class="feature-icon">🧠</div>
+            <h2 class="feature-title">System Metrics</h2>
+        </div>
+
+        <p class="feature-description">
+            Fusion of YOLOv8 detection and MediaPipe Pose estimation
+            to reduce false positives and improve robustness.
+        </p>
+
+        <div class="metric-bars">
+            <div class="metric-bar">
+                <span class="metric-label">Confidence</span>
+                <div class="bar-container">
+                    <div class="bar-fill" id="conf-bar"></div>
+                </div>
+            </div>
+
+            <div class="metric-bar">
+                <span class="metric-label">Stability</span>
+                <div class="bar-container">
+                    <div class="bar-fill" id="stab-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <p id="fall-status" class="safe">SAFE</p>
+    </div>
+
+</section>
+<!-- <div id="fps">0</div>
+<div id="fall-count">0</div>
+<div id="accuracy">0%</div> -->
+
+<!-- <div class="bar-fill" id="conf-bar"></div>
+<div class="bar-fill" id="stab-bar"></div> -->
+
+<!-- <p id="fall-status" class="safe">SAFE</p> -->
+
+<!-- <script>
+const img = document.getElementById("video-stream");
+async function startCamera() {
+  await fetch("/start", { method: "POST" });
+  img.src = "/video_feed";   // ⭐ DÒNG QUAN TRỌNG NHẤT
+}
+
+async function stopCamera() {
+  await fetch("/stop", { method: "POST" });
+  img.src = "";
+}
+</script> -->
+<script>
+const BACKEND = "http://localhost:5000";
+
+function startCamera() {
+    fetch(`${BACKEND}/start`, { method: "POST" });
+    document.getElementById("video-stream").src = `${BACKEND}/video_feed`;
+    document.getElementById("model-status").innerText = "ON";
+}
+
+function stopCamera() {
+    fetch(`${BACKEND}/stop`, { method: "POST" });
+    document.getElementById("video-stream").src = "";
+    document.getElementById("model-status").innerText = "OFF";
+}
+async function updateStatus() {
+    try {
+        const res = await fetch(`${BACKEND}/status`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        document.getElementById("fps").innerText = data.fps;
+        document.getElementById("fall-count").innerText = data.fall_count;
+        document.getElementById("accuracy").innerText = Math.round(data.confidence * 100) + "%";
+
+        document.getElementById("conf-bar").style.width = Math.round(data.confidence * 100) + "%";
+        document.getElementById("stab-bar").style.width = Math.round(data.stability * 100) + "%";
+
+        if (data.fall) {
+            document.getElementById("fall-status").innerText = "FALL DETECTED";
+            document.getElementById("fall-status").className = "fall";
+        } else {
+            document.getElementById("fall-status").innerText = "SAFE";
+            document.getElementById("fall-status").className = "safe";
+        }
+    } catch (err) {
+        console.error("Backend error:", err);
+    }
+}
+
+setInterval(updateStatus, 1000);
+</script>
+
+
+<!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
+
+</body>
+</html>
