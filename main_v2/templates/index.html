@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Fall Detection Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/body.css') }}">
+</head>
+<body>
+
+<!-- Fall Alert Banner — starts hidden, JS shows it on fall -->
+<div id="fall-alert-banner" style="display:none">⚠ FALL DETECTED — Person on ground ⚠</div>
+
+<header>
+    <div class="logo">FALL DETECTION AI</div>
+    <nav>
+        <a href="#live">Live Camera</a>
+        <a href="#stats">Statistics</a>
+        <a href="#source-section">Source</a>
+        <a href="#system">System</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>AI Fall Detection System</h1>
+    <p class="subtitle">
+        Real-time fall detection using YOLOv8 and MediaPipe Pose.<br>
+        Designed for healthcare and smart surveillance systems.
+    </p>
+    <button onclick="startCamera()" class="cta-button">▶ Start Camera</button>
+    <button onclick="stopCamera()" class="cta-button" style="margin-left:10px;">■ Stop</button>
+</section>
+
+<!-- Stats -->
+<section class="stats" id="stats">
+    <div class="stat-card">
+        <div class="stat-number" id="model-status">OFF</div>
+        <div class="stat-label">Model Status</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="fps">0</div>
+        <div class="stat-label">FPS</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="fall-count">0</div>
+        <div class="stat-label">Fall Events</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="accuracy">0%</div>
+        <div class="stat-label">Confidence</div>
+    </div>
+</section>
+
+<!-- ── INPUT SOURCE PANEL ──────────────────────────────────── -->
+<div class="source-panel" id="source-section">
+    <h3>📂 Input Source — webcam, video file, or photo</h3>
+
+    <div class="source-row">
+        <select id="source-select">
+            <option value="webcam">🎥 Webcam (live)</option>
+        </select>
+        <button class="btn-src" onclick="applySource()">▶ Use This Source</button>
+        <button class="btn-src outline" onclick="loadMediaList()">⟳ Refresh List</button>
+    </div>
+
+    <div class="upload-zone">
+        <label class="btn-choose" for="file-input">📁 Choose File</label>
+        <input type="file" id="file-input"
+               accept=".mp4,.avi,.mkv,.mov,.wmv,.jpg,.jpeg,.png,.bmp"
+               onchange="onFileSelected(this)">
+        <span id="upload-name">No file selected — pick a video or photo</span>
+        <button class="btn-upload" id="btn-upload" disabled onclick="uploadFile()">
+            ⬆ Upload &amp; Switch
+        </button>
+    </div>
+</div>
+
+<!-- ── MAIN PANELS ─────────────────────────────────────────── -->
+<section class="features">
+
+    <!-- Live Feed -->
+    <div class="feature-card" id="live">
+        <div class="feature-header">
+            <div class="feature-icon">📷</div>
+            <h2 class="feature-title">Live Feed</h2>
+            <span id="source-badge">source: —</span>
+        </div>
+        <img id="video-stream" src=""
+             alt="Press ▶ Start Camera to begin"
+             style="width:100%; border-radius:16px; min-height:200px; background:#000;" />
+    </div>
+
+    <!-- System Metrics -->
+    <div class="feature-card" id="system">
+        <div class="feature-header">
+            <div class="feature-icon">🧠</div>
+            <h2 class="feature-title">System Metrics</h2>
+        </div>
+
+        <p class="feature-description">
+            Fusion of YOLOv8 detection and MediaPipe Pose estimation
+            to reduce false positives and improve robustness.
+        </p>
+
+        <div class="metric-bars">
+            <div class="metric-bar">
+                <span class="metric-label">Confidence</span>
+                <div class="bar-container">
+                    <div class="bar-fill" id="conf-bar"></div>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <span class="metric-label">Stability</span>
+                <div class="bar-container">
+                    <div class="bar-fill" id="stab-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <p id="fall-status" class="safe">SAFE</p>
+
+        <div style="margin-top:18px;">
+            <div style="font-size:11px;color:#6b7280;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">
+                Alert Log
+            </div>
+            <ul id="alert-log"><li class="safe">— No alerts yet —</li></ul>
+        </div>
+    </div>
+</section>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+opencv-python==4.10.0.84
+numpy==1.26.4
+mediapipe==0.10.21
+flask==3.1.2
+flask-cors
+ultralytics==8.3.253
